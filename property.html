@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Детайли за имот</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .property-gallery img {
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+
+        .property-gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        #full-image {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        #full-image img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 8px;
+        }
+
+        #full-image span {
+            position: absolute;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #close-btn {
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+        }
+
+        #prev-btn {
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%);
+        }
+
+        #next-btn {
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="proekt.html">ИмотБГ</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="proekt.html">Начало</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="add-property-enhanced.html">Добави имот</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Моите имоти</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 bg-white p-4 rounded shadow">
+        <h2 class="text-center mb-4">Детайли за имота</h2>
+
+        <div class="mb-4">
+            <h4>Галерия</h4>
+            <div class="row g-2 property-gallery"></div>
+        </div>
+
+        <div class="mb-4">
+            <h4>Основна информация</h4>
+            <p><strong>Тип имот:</strong> <span id="property-type"></span></p>
+            <p><strong>Локация:</strong> <span id="property-location"></span></p>
+            <p><strong>Цена:</strong> <span id="property-price"></span> €</p>
+            <p><strong>Площ:</strong> <span id="property-area"></span> кв.м</p>
+        </div>
+
+        <div class="mb-4">
+            <h4>Описание</h4>
+            <p id="property-description"></p>
+        </div>
+
+        <div id="full-image">
+            <span id="close-btn">&times;</span>
+            <span id="prev-btn">&#10094;</span>
+            <span id="next-btn">&#10095;</span>
+            <img src="" alt="Пълно изображение" />
+        </div>
+
+        <footer class="mt-5">
+            <p>ИмотБГ © 2025. Всички права запазени.</p>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function loadProperties() {
+                const defaultProperties = [
+                    {
+                        id: "1",
+                        type: "Апартамент",
+                        location: "София, Лозенец",
+                        price: "150000",
+                        area: "65",
+                        description: "Прекрасен двустаен апартамент с невероятна гледка към Витоша. Имотът се намира в сърцето на Лозенец, в близост до метро, магазини и паркове.",
+                        images: ["site-images/apartment1.jpg", "site-images/apartment2.jpg", "site-images/apartment3.jpg"]
+                    },
+                    {
+                        id: "2",
+                        type: "Къща",
+                        location: "София, Бояна",
+                        price: "350000",
+                        area: "180",
+                        description: "Луксозна къща с голям двор и басейн. Разположена в престижния квартал Бояна, с лесен достъп до Витоша и центъра на града.",
+                        images: ["site-images/house1.jpg", "site-images/house2.jpg", "site-images/house3.jpg"]
+                    },
+                    {
+                        id: "3",
+                        type: "Офис",
+                        location: "София, Център",
+                        price: "220000",
+                        area: "120",
+                        description: "Просторен офис в сърцето на София, с лесен достъп до основни транспортни артерии и всички удобства. Подходящ за бизнеси, които търсят локация в централната част на града.",
+                        images: ["site-images/office1.jpg", "site-images/office2.jpg", "site-images/office3.jpg"]
+                    },
+                    {
+                        id: "4",
+                        type: "Апартамент",
+                        location: "Пловдив, Център",
+                        price: "95000",
+                        area: "75",
+                        description: "Уютен тристаен апартамент в централната част на Пловдив, близо до магазини, ресторанти и обществени услуги.",
+                        images: ["site-images/apartment2_1.jpg", "site-images/apartment2_2.jpg", "site-images/apartment2_3.jpg"]
+                    },
+                    {
+                        id: "5",
+                        type: "Къща",
+                        location: "Варна, Бриз",
+                        price: "280000",
+                        area: "180",
+                        description: "Просторна триетажна къща с голям двор в престижния район Бриз, идеална за семейства с деца.",
+                        images: ["site-images/house2_1.jpg", "site-images/house2_2.jpg", "site-images/house2_3.jpg"]
+                    },
+                    {
+                        id: "6",
+                        type: "Къща",
+                        location: "Бургас, Сарафово",
+                        price: "195000",
+                        area: "150",
+                        description: "Нова къща с модерна архитектура, разположена в спокойния район Сарафово, близо до морето. Отлична за почивка и постоянно живеене.",
+                        images: ["site-images/house3_1.jpg", "site-images/house3_2.jpg", "site-images/house3_3.jpg"]
+                    }
+                ];
+                const stored = localStorage.getItem('properties');
+                return stored ? [...defaultProperties, ...JSON.parse(stored)] : defaultProperties;
+            }
+
+            const properties = loadProperties();
+
+            function getPropertyId() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('id');
+            }
+
+            function displayProperty() {
+                const id = getPropertyId();
+                const property = properties.find(p => p.id === id);
+
+                if (!property) {
+                    document.querySelector('.container').innerHTML = '<h1>Имотът не е намерен</h1>';
+                    return;
+                }
+
+                document.getElementById('property-type').textContent = property.type;
+                document.getElementById('property-location').textContent = property.location;
+                document.getElementById('property-price').textContent = Number(property.price).toLocaleString();
+                document.getElementById('property-area').textContent = property.area;
+                document.getElementById('property-description').textContent = property.description;
+
+
+                const gallery = document.querySelector('.property-gallery');
+                gallery.innerHTML = property.images.map((image, index) => `
+        <div class="col-6 col-md-4 col-lg-3">
+          <img src="${image}" alt="Снимка ${index + 1}" class="img-fluid gallery-image" />
+        </div>
+      `).join('');
+            }
+
+            let currentImageIndex = 0;
+            let currentImages = [];
+
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('gallery-image')) {
+                    const images = Array.from(document.querySelectorAll('.gallery-image'));
+                    currentImages = images.map(img => img.src);
+                    currentImageIndex = images.indexOf(e.target);
+                    openFullImage();
+                }
+            });
+
+            function openFullImage() {
+                const fullImageDiv = document.getElementById('full-image');
+                const fullImage = fullImageDiv.querySelector('img');
+                fullImage.src = currentImages[currentImageIndex];
+                fullImageDiv.style.display = 'flex';
+            }
+
+            document.getElementById('close-btn').onclick = () => {
+                document.getElementById('full-image').style.display = 'none';
+            };
+
+            document.getElementById('prev-btn').onclick = (e) => {
+                e.stopPropagation();
+                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                openFullImage();
+            };
+
+            document.getElementById('next-btn').onclick = (e) => {
+                e.stopPropagation();
+                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                openFullImage();
+            };
+
+            window.onload = displayProperty;
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добави нов имот</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #777;
+        }
+
+        .preview-img {
+            max-width: 100px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="proekt.html">ИмотБГ</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="proekt.html">Начало</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="add-property-enhanced.html">Добави имот</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Моите имоти</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4 text-center">Добави нов имот</h2>
+        <form id="property-form">
+            <div class="mb-3">
+                <label for="property-type" class="form-label">Тип имот</label>
+                <select class="form-select" id="property-type" required>
+                    <option value="">Изберете тип</option>
+                    <option value="Къща">Къща</option>
+                    <option value="Апартамент">Апартамент</option>
+                    <option value="Офис">Офис</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="location" class="form-label">Локация</label>
+                <input type="text" class="form-control" id="location" required>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Цена (лв.)</label>
+                <input type="number" class="form-control" id="price" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="area" class="form-label">Площ (кв.м)</label>
+                <input type="number" class="form-control" id="area" min="0" required>
+            </div>
+            <div class="mb-3">
+                <label for="images" class="form-label">Снимки</label>
+                <input class="form-control" type="file" id="images" accept="image/*" multiple>
+                <div class="d-flex mt-2" id="preview"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Запази</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>ИмотБГ © 2025. Всички права запазени.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('images').addEventListener('change', function (event) {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            Array.from(event.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('preview-img');
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.getElementById('property-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const loggedUser = localStorage.getItem("loggedInUser");
+            if (!loggedUser) {
+                alert("Моля, влезте в профила си, за да добавите имот.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Взимаме данните от формата
+            const propertyType = document.getElementById("property-type").value;
+            const location = document.getElementById("location").value;
+            const price = document.getElementById("price").value;
+            const area = document.getElementById("area").value;
+            const description = document.getElementById("description").value;
+
+            // Преобразуваме изображенията (само имената, не съдържанието)
+            const imageFiles = document.getElementById("images").files;
+            const images = Array.from(imageFiles).map(file => file.name);
+
+            // Създаваме новия имот
+            const newProperty = {
+                id: Date.now().toString(),
+                type: propertyType,
+                location,
+                price,
+                area,
+                description,
+                images,
+                agent: {
+                    email: loggedUser
+                }
+            };
+
+            // Записваме в localStorage
+            const existing = JSON.parse(localStorage.getItem("properties") || "[]");
+            existing.push(newProperty);
+            localStorage.setItem("properties", JSON.stringify(existing));
+
+            alert("Имотът е добавен успешно!");
+            window.location.href = "my-profile.html";
+        });
+
+        const path = window.location.pathname.split("/").pop();
+
+        document.querySelectorAll(".nav-link").forEach(link => {
+            if (link.getAttribute("href") === path) {
+                link.classList.add("active", "fw-bold");
+            } else {
+                link.classList.remove("active", "fw-bold");
+            }
+        });
+
+        const loggedUser = localStorage.getItem("loggedInUser");
+
+    </script>
+
+</body>
+
+</html>

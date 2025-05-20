@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Търсене на имоти</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin-top: 40px;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      color: #777;
+    }
+
+    .property-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+      background: white;
+    }
+
+    .property-card:hover {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .property-info {
+      padding: 15px;
+    }
+
+    .see-more-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="proekt.html">ИмотБГ</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="proekt.html">Начало</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="add-property-enhanced.html">Добави имот</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">Моите имоти</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <form class="mb-4" id="search-form">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="property-type" class="form-label">Тип имот</label>
+          <select class="form-select" id="property-type">
+            <option value="">Всички</option>
+            <option value="Апартамент">Апартамент</option>
+            <option value="Къща">Къща</option>
+            <option value="Офис">Офис</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="location" class="form-label">Локация</label>
+          <input type="text" class="form-control" id="location" placeholder="Въведете град" />
+        </div>
+        <div class="col-md-3">
+          <label for="price" class="form-label">Цена до</label>
+          <input type="number" class="form-control" id="price" min="0" />
+        </div>
+        <div class="col-md-3">
+          <label for="area" class="form-label">Минимална площ</label>
+          <input type="number" class="form-control" id="area" min="0" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-3 w-100">Търси</button>
+    </form>
+
+    <div id="search-results" style="display: none;">
+      <h3 class="mb-3">Намерени имоти:</h3>
+      <div class="row g-4 results-list"></div>
+      <div class="d-flex justify-content-between mt-4">
+        <button id="prev-btn" class="btn btn-outline-primary">Назад</button>
+        <button id="next-btn" class="btn btn-outline-primary">Напред</button>
+      </div>
+    </div>
+  </div>
+
+  <h1>
+    <div id="slogan" class="text-center my-4 fs-4 text-uppercase text-secondary">
+      ВИЕ ТЪРСИТЕ, НИЕ НАМИРАМЕ!
+    </div>
+  </h1>
+
+  <footer>
+    <p>ИмотБГ © 2025. Всички права запазени.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const defaultProperties = [
+      { id: "1", type: "Апартамент", location: "София, Лозенец", price: "150000", area: "65" },
+      { id: "2", type: "Къща", location: "София, Бояна", price: "350000", area: "180" },
+      { id: "3", type: "Офис", location: "София, Център", price: "220000", area: "120" },
+      { id: "4", type: "Апартамент", location: "Пловдив, Център", price: "95000", area: "75" },
+      { id: "5", type: "Къща", location: "Варна, Бриз", price: "280000", area: "180" },
+      { id: "6", type: "Къща", location: "Бургас, Сарафово", price: "195000", area: "150" }
+    ];
+
+    function loadProperties() {
+      const stored = localStorage.getItem('properties');
+      return stored ? [...defaultProperties, ...JSON.parse(stored)] : defaultProperties;
+    }
+
+    const properties = loadProperties();
+    let currentPage = 1;
+    const resultsPerPage = 3;
+    let filteredResults = [];
+
+    document.getElementById('search-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('slogan').style.display = 'none'; // скриване на лозунга
+
+      const filters = {
+        propertyType: document.getElementById('property-type').value,
+        location: document.getElementById('location').value,
+        price: document.getElementById('price').value,
+        area: document.getElementById('area').value
+      };
+      filterResults(filters);
+      displayPage();
+    });
+
+    function filterResults(filters) {
+      filteredResults = properties.filter(p =>
+        (filters.propertyType === '' || p.type === filters.propertyType) &&
+        p.location.toLowerCase().includes(filters.location.toLowerCase()) &&
+        (filters.price === '' || parseInt(p.price) <= parseInt(filters.price)) &&
+        (filters.area === '' || parseInt(p.area) >= parseInt(filters.area))
+      );
+      currentPage = 1;
+      document.getElementById('search-results').style.display = 'block';
+    }
+
+    function displayPage() {
+      const list = document.querySelector('.results-list');
+      list.innerHTML = '';
+      const start = (currentPage - 1) * resultsPerPage;
+      const end = start + resultsPerPage;
+      const pageResults = filteredResults.slice(start, end);
+
+      if (pageResults.length === 0) {
+        list.innerHTML = '<p>Няма намерени имоти по зададените критерии.</p>';
+      } else {
+        pageResults.forEach(p => {
+          const col = document.createElement('div');
+          col.className = 'col-md-4';
+          col.innerHTML = `
+          <div class="property-card">
+            <div class="property-info">
+              <h5>${p.type}</h5>
+              <p>Локация: ${p.location}</p>
+              <p>Цена: ${p.price} €</p>
+              <p>Площ: ${p.area} кв.м</p>
+              <button onclick="window.location.href='property.html?id=${p.id}'" class="see-more-btn mt-2">Виж повече</button>
+            </div>
+          </div>`;
+          list.appendChild(col);
+        });
+      }
+
+      document.getElementById('prev-btn').disabled = currentPage === 1;
+      document.getElementById('next-btn').disabled = end >= filteredResults.length;
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', function () {
+      if (currentPage > 1) {
+        currentPage--;
+        displayPage();
+      }
+    });
+
+    document.getElementById('next-btn').addEventListener('click', function () {
+      if (currentPage * resultsPerPage < filteredResults.length) {
+        currentPage++;
+        displayPage();
+      }
+    });
+
+    const path = window.location.pathname.split("/").pop();
+
+    document.querySelectorAll(".nav-link").forEach(link => {
+      if (link.getAttribute("href") === path) {
+        link.classList.add("active", "fw-bold");
+      } else {
+        link.classList.remove("active", "fw-bold");
+      }
+    });
+  </script>
+
+</body>
+
+</html>
